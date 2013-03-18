@@ -1,7 +1,9 @@
 <?php
+require(__DIR__.'/constants.php');
+require(__DIR__.'/config.php');
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+use PhpAmqpLib\Connection\AMQPConnection;
+
+$connection = new AMQPConnection(HOST, PORT, USER, PASS, VHOST);
+
 ?>

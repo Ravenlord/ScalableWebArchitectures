@@ -50,6 +50,9 @@ if(empty($folders)) {
     echo '</ul>';
 }
 echo '</div>';
+echo '<div id="file-form-wrapper">';
+
+echo '</div>';
 echo '</div>';
 echo '</div><!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><script src="http://code.jquery.com/jquery-1.9.1.min.js"></script><script src="script/bc.js"></script></body></html>';
 ?>

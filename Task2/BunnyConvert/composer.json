@@ -1,0 +1,13 @@
+{
+    "name": "vendor/bunny-convert",
+    "description": "Description of project BunnyConvert.",
+    "authors": [
+        {
+            "name": "Markus",
+            "email": "your@email.here"
+        }
+    ],
+    "require": {
+        "videlalvaro/php-amqplib": "2.*"
+    }
+}
