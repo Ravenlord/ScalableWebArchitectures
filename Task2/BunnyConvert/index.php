@@ -25,11 +25,12 @@ if(file_exists($path)) {
     $folders = scandir($path);
     $folders = cleanFileArray($folders);
 }
-echo '<!DOCTYPE html><html><head><meta charset=utf-8 /><title>BunnyConvert</title><link rel="stylesheet" type="text/css" href="style/main.css" /></head><body>';
-echo '<div id="container"><h1>Welcome to BunnyConvert!</h1>';
-echo '<noscript>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript>';
+echo '<!DOCTYPE html><html><head><meta charset=utf-8 /><title>BunnyConvert</title><link rel="stylesheet" type="text/css" href="assets/css/bootstrap.css" /><link rel="stylesheet" type="text/css" href="style/main.css" /></head><body>';
+echo '<div id="container" class="container"><h1>Welcome to BunnyConvert!</h1>';
+echo '<noscript class="label label-important"><i class="icon-white icon-remove"></i>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript>';
 echo '<div id="content">';
 echo '<div id="files">';
+echo '<strong>'.$uid.'</strong>';
 if(empty($folders)) {
     echo 'No files processed yet.';
 } else {
