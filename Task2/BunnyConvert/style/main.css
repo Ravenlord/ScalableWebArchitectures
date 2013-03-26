@@ -1,1 +1,2 @@
-#content{display: none}
+#content, #tags-fieldset, #upload-progress{display: none}
+#upload-progress{width: 100%; margin: 10px}

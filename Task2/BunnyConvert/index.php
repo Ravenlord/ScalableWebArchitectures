@@ -52,8 +52,59 @@ if(empty($folders)) {
 }
 echo '</div>';
 echo '<div id="file-form-wrapper">';
-
+// Print the upload form
+echo '<form id="form" class="form-horizontal" enctype="multipart/form-data" action="upload.php" method="post">';
+    echo '<fieldset id="file-fieldset">';
+        echo '<legend>File</legend>';
+        echo '<div class="control-group">';
+            echo '<label class="control-label" for="file">File</label>';
+            echo '<div class="controls">';
+                echo '<input id="file" class="input-large" name="file" type="file">';
+            echo '</div>';
+            echo '<progress id="upload-progress" value="0" max="100"></progress>';
+        echo '</div>';
+    echo '</fieldset>';
+    echo '<a id="tags-expander" href="#"><i id="tags-expander-icon" class="icon-arrow-right"></i>Apply Tags</a>';
+    echo '<fieldset id="tags-fieldset">';
+        echo '<legend>Tags</legend>';
+        echo '<div class="control-group">';
+            echo '<label class="control-label" for="artist">Artist</label>';
+            echo '<div class="controls">';
+                echo '<input id="artist" class="input-large" name="artist" type="text">';
+            echo '</div>';
+        echo '</div>';
+        echo '<div class="control-group">';
+            echo '<label class="control-label" for="title">Title</label>';
+            echo '<div class="controls">';
+                echo '<input id="title" class="input-large" name="title" type="text">';
+            echo '</div>';
+        echo '</div>';
+        echo '<div class="control-group">';
+            echo '<label class="control-label" for="album">Album</label>';
+            echo '<div class="controls">';
+                echo '<input id="album" class="input-large" name="album" type="text">';
+            echo '</div>';
+        echo '</div>';
+        echo '<div class="control-group">';
+            echo '<label class="control-label" for="trackno">Track number</label>';
+            echo '<div class="controls">';
+                echo '<input id="trackno" class="input-large" name="trackno" type="text">';
+            echo '</div>';
+        echo '</div>';
+        echo '<div class="control-group">';
+            echo '<label class="control-label" for="year">Year</label>';
+            echo '<div class="controls">';
+                echo '<input id="year" class="input-large" name="year" type="text">';
+            echo '</div>';
+        echo '</div>';
+    echo '</fieldset>';
+    echo '<div class="form-actions">';
+        echo '<button class="btn btn-large btn-success" type="submit" >Upload</button>';
+    echo '</div>';
+echo '</form>';
+// end of upload form
 echo '</div>';
 echo '</div>';
-echo '</div><!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><script src="http://code.jquery.com/jquery-1.9.1.min.js"></script><script src="script/bc.js"></script></body></html>';
+echo '<div id="debug"></div>';
+echo '</div><!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><script src="http://code.jquery.com/jquery-1.9.1.min.js"></script><script src="script/jquery.form.js"></script><script src="script/bc.js"></script></body></html>';
 ?>
