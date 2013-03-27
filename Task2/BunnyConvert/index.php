@@ -27,7 +27,7 @@ if(file_exists($path)) {
 }
 echo '<!DOCTYPE html><html><head><meta charset=utf-8 /><title>BunnyConvert</title><link rel="stylesheet" type="text/css" href="assets/css/bootstrap.css" /><link rel="stylesheet" type="text/css" href="style/main.css" /></head><body>';
 echo '<div id="container" class="container"><h1>Welcome to BunnyConvert!</h1>';
-echo '<noscript class="label label-important"><i class="icon-white icon-remove"></i>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript>';
+echo '<noscript class="badge badge-important"><i class="icon-white icon-remove"></i>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript>';
 echo '<div id="content">';
 echo '<div id="files">';
 echo '<strong>'.$uid.'</strong>';
@@ -62,6 +62,7 @@ echo '<form id="form" class="form-horizontal" enctype="multipart/form-data" acti
                 echo '<input id="file" class="input-large" name="file" type="file">';
             echo '</div>';
             echo '<progress id="upload-progress" value="0" max="100"></progress>';
+            echo '<div id="form-message" class="badge"></div>';
         echo '</div>';
     echo '</fieldset>';
     echo '<a id="tags-expander" href="#"><i id="tags-expander-icon" class="icon-arrow-right"></i>Apply Tags</a>';
