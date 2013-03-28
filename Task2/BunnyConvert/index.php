@@ -28,6 +28,7 @@ if(file_exists($path)) {
 echo '<!DOCTYPE html><html><head><meta charset=utf-8 /><title>BunnyConvert</title><link rel="stylesheet" type="text/css" href="assets/css/bootstrap.css" /><link rel="stylesheet" type="text/css" href="style/main.css" /></head><body>';
 echo '<div id="container" class="container"><h1>Welcome to BunnyConvert!</h1>';
 echo '<noscript class="badge badge-important"><i class="icon-white icon-remove"></i>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript>';
+echo '<div id="application-message" class="badge badge-important"></div>';
 echo '<div id="content">';
 echo '<div id="files">';
 echo '<strong>'.$uid.'</strong>';
@@ -107,5 +108,5 @@ echo '</form>';
 echo '</div>';
 echo '</div>';
 echo '<div id="debug"></div>';
-echo '</div><!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><script src="http://code.jquery.com/jquery-1.9.1.min.js"></script><script src="script/jquery.form.js"></script><script src="script/bc.js"></script></body></html>';
+echo '</div><!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><script src="http://code.jquery.com/jquery-1.9.1.min.js"></script><script src="script/jquery.cookie.js"></script><script src="script/jquery.form.js"></script><script src="script/bc.js"></script></body></html>';
 ?>

@@ -8,6 +8,8 @@
         }
     ],
     "require": {
-        "videlalvaro/php-amqplib": "2.*"
+        "videlalvaro/php-amqplib": "2.*",
+        "cboden/Ratchet": "0.2.*",
+        "wrench/wrench": "2.0.*"
     }
 }

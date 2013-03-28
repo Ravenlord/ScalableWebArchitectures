@@ -25,6 +25,11 @@ define('TAGS_TITLE', 'title');
 define('TAGS_ALBUM', 'album');
 define('TAGS_TRACKNO', 'trackno');
 define('TAGS_YEAR', 'year');
+// Messaging constants for the WebSocket
+define('WEBSOCKET_COMMAND', 'command');
+define('WEBSOCKET_COMMAND_REGISTER', 'register_client');
+define('WEBSOCKET_SUCCESS', 'success');
+define('WEBSOCKET_CLIENTID', 'clientId');
 // Error reporting switches.
 ini_set('display_errors',1);
 error_reporting(-1);
