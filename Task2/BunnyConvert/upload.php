@@ -8,9 +8,10 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 
 $allowedExtensions = array('wav', 'wv', 'flac');
-$response['error'] = false;
-$response['message'] = 'Your file has been successfully uploaded!';
+$response[WEBSOCKET_SUCCESS] = true;
+$response[WEBSOCKET_MESSAGE] = 'Your file has been successfully uploaded!';
 if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) {
+  $clientId = $_COOKIE[COOKIE_UID];
   // Check if we have the file information needed.
   if (!empty($_FILES[FILE_FORM_FIELD]) && !empty($_FILES[FILE_FORM_FIELD]['name'])) {
     $fileInfo = $_FILES[FILE_FORM_FIELD];
@@ -22,18 +23,23 @@ if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) 
       $extension = substr($fileInfo['name'], $pos + 1);
       if (in_array($extension, $allowedExtensions)) {
         // Construct path for upload base folder.
-        $uploadBaseFolder = FILE_PATH . $_COOKIE[COOKIE_UID] . DIRECTORY_SEPARATOR;
-        // If the folder doesn't exist, create it
+        $uploadBaseFolder = FILE_PATH . $clientId . DIRECTORY_SEPARATOR;
+        // If the folder doesn't exist, create it and set permissions.
         $returnCode = file_exists($uploadBaseFolder);
         if(!$returnCode){
           $returnCode = mkdir($uploadBaseFolder);
+          chmod($uploadBaseFolder, 0777);
         }
-        // Create a new unique directory for the file upload.
+        // Create a new unique directory for the file upload and set permissions.
         date_default_timezone_set('UTC');
-        $uploadFileFolder = $uploadBaseFolder . date_timestamp_get(date_create()) . DIRECTORY_SEPARATOR;
+        $subFolder = date_timestamp_get(date_create()) . DIRECTORY_SEPARATOR;
+        $uploadFileFolder = $uploadBaseFolder . $subFolder;
         $returnCode = mkdir($uploadFileFolder);
-        // Move the uploaded file to the newly created folder.
+        chmod($uploadFileFolder, 0777);
+        // Move the uploaded file to the newly created folder and set permissionsa.
+        $fileUploadName = $uploadFileFolder . $fileInfo['name'];
         $returnCode = move_uploaded_file($fileInfo['tmp_name'], $uploadFileFolder . $fileInfo['name']);
+        chmod($fileUploadName, 0777);
         // If the new folder exists now, continue.
         if($returnCode){
           //TODO: pass message to WAV converter.
@@ -50,10 +56,12 @@ if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) 
                           TAGS_YEAR => $year
                         );
           $msgBody = json_encode(array(
-                                        SOURCE_PATH => $uploadFileFolder,
-                                        FILE_NAME => $fileName,
-                                        SOURCE_FORMAT => $extension,
-                                        TAGS => $tags
+                                        CLIENT_ID     =>  $clientId,
+                                        SOURCE_PATH   =>  $uploadFileFolder,
+                                        SUB_FOLDER    => $subFolder,
+                                        FILE_NAME     =>  $fileName,
+                                        SOURCE_FORMAT =>  $extension,
+                                        TAGS          =>  $tags
                                        ), JSON_UNESCAPED_SLASHES);
           $msg = new AMQPMessage($msgBody, array('content_type' => 'text/plain', 'delivery_mode' => 2));
           $connection = new AMQPConnection(HOST, PORT, USER, PASS, VHOST);
@@ -62,25 +70,25 @@ if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) 
           register_shutdown_function('shutdownMessaging', $channel, $connection);
           $channel->basic_publish($msg, WAV_EXCHANGE);
         } else {
-          $response['error'] = true;
-          $response['message'] = 'Your file could not be moved. Please try again.';
+          $response[WEBSOCKET_SUCCESS] = false;
+          $response[WEBSOCKET_MESSAGE] = 'Your file could not be moved. Please try again.';
         }
       } else {
-        $response['error'] = true;
-        $response['message'] = 'Invalid file type. Allowed types: FLAC, WAV, WAVPACK.';
+        $response[WEBSOCKET_SUCCESS] = false;
+        $response[WEBSOCKET_MESSAGE] = 'Invalid file type. Allowed types: FLAC, WAV, WAVPACK.';
       }
     } else {
-      $response['error'] = true;
-      $response['message'] = 'There was an error during the upload. Please try again.';
+      $response[WEBSOCKET_SUCCESS] = false;
+      $response[WEBSOCKET_MESSAGE] = 'There was an error during the upload. Please try again.';
     }
 
   } else {
-    $response['error'] = true;
-    $response['message'] = 'Please select a file to upload!';
+    $response[WEBSOCKET_SUCCESS] = false;
+    $response[WEBSOCKET_MESSAGE] = 'Please select a file to upload!';
   }
 } else {
-  $response['error'] = true;
-  $response['message'] = 'Cookies are disabled in your browser. Please enable them to make this service work!';
+  $response[WEBSOCKET_SUCCESS] = false;
+  $response[WEBSOCKET_MESSAGE] = 'Cookies are disabled in your browser. Please enable them to make this service work!';
 }
 header('Content-type: application/json');
 echo json_encode($response);

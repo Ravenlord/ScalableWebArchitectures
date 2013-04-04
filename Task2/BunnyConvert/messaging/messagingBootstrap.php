@@ -25,6 +25,11 @@ $channel->exchange_declare(WAV_EXCHANGE, 'direct', false, false, false);
 $channel->queue_declare(WAV_QUEUE, false, false, false, false);
 $channel->queue_bind(WAV_QUEUE, WAV_EXCHANGE);
 
+// Register the exchange and the queue for the file service and bind them.
+$channel->exchange_declare(FILE_SERVICE_EXCHANGE, 'direct', false, false, false);
+$channel->queue_declare(FILE_SERVICE_QUEUE, false, false, false, false);
+$channel->queue_bind(FILE_SERVICE_QUEUE, FILE_SERVICE_EXCHANGE);
+
 //TODO: Declare and bind all other converter queues.
 
 // Close channel and connection on exit.

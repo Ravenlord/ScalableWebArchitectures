@@ -63,6 +63,9 @@ $(document).ready(function documentReady() {
       return false;
     });
 
+    // Apply the jQuery table sorter to the table
+    $('#file-table').tablesorter();
+
     // Apply the jQuery form plugin to the form.
     var formOptions = {
       beforeSubmit: function showRequest(formData, jqForm, options) {
@@ -70,7 +73,8 @@ $(document).ready(function documentReady() {
         $('#form :input, #form :button').attr('disabled', 'disabled');
         $('#upload-progress').show('fast');
       },
-      dataType: 'json',
+      // TODO: uncomment
+      //dataType: 'json',
       error: function(responseText, statusText, xhr, $form) {
         $('#upload-progress').hide('fast');
         $('#form :input, #form :button').removeAttr('disabled');
@@ -79,13 +83,13 @@ $(document).ready(function documentReady() {
         $msgDiv.addClass('badge badge-important');
         $msgDiv.text('An unexpected error occured. Please try again.');
         $msgDiv.show('slow');
-        console.log('Error: ' + responseText + ' ' + statusText);
+        console.log('Error: ' + JSON.stringify(responseText) + ' ' + statusText);
       },
       success: function(response, statusText, xhr, $form) {
         $('#upload-progress').hide('fast');
         $('#form :input, #form :button').removeAttr('disabled');
         var $msgDiv = $('#form-message');
-        if (response.error) {
+        if (!response.success) {
           $msgDiv.removeClass();
           $msgDiv.addClass('badge badge-important');
         } else {
