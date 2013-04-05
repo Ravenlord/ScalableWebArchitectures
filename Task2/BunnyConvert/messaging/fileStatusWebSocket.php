@@ -40,6 +40,10 @@ class FileStatusNotifier implements MessageComponentInterface {
         $returnMessage = array(WEBSOCKET_COMMAND => WEBSOCKET_COMMAND_REGISTER_CLIENT, WEBSOCKET_SUCCESS => $success);
         $from->send(json_encode($returnMessage));
         break;
+      case WEBSOCKET_COMMAND_KEEPALIVE:
+        echo 'Received keepalive from client ' . $from->resourceId . "\n";
+        $from->send(json_encode($msg));
+        break;
       case WEBSOCKET_COMMAND_REGISTER_FILE_SERVICE:
         $this->fileServices->attach($from, $msg[FILE_SERVICE_ID]);
         echo "Registering file service " . $from->resourceId . " with ID " . $msg[FILE_SERVICE_ID] . "\n";

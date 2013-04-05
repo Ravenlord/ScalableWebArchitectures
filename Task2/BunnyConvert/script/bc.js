@@ -1,6 +1,7 @@
 var bcUID = undefined;
 var filesPresent = false;
 
+var COMMAND_KEEPALIVE = 'keepalive';
 var COMMAND_REGISTER_CLIENT = 'register_client';
 var COMMAND_CONVERT_WAV = 'convert_wav';
 
@@ -33,7 +34,7 @@ $(document).ready(function documentReady() {
     webSocketConnection.onopen = function webSocketConnect(event) {
       console.log('WebSocket connection established!');
       var registerMessage = {
-                              command: 'register_client',
+                              command: COMMAND_REGISTER_CLIENT,
                               clientId: bcUID
                             };
       console.log('Trying to register client...');
@@ -49,7 +50,16 @@ $(document).ready(function documentReady() {
             case COMMAND_REGISTER_CLIENT:
               if(data.success) {
                 console.log('Client registered.');
+                // Call keepalive function in ten second intervals.
+                window.setInterval(function webSocketKeepalive(){
+                  webSocketConnection.send(JSON.stringify({
+                                                            command: COMMAND_KEEPALIVE
+                                                          }));
+                }, 10000);
               }
+              break;
+            case COMMAND_KEEPALIVE:
+              console.log('Keepalive succeeded.');
               break;
             case COMMAND_CONVERT_WAV:
               if(data.success) {
@@ -74,6 +84,11 @@ $(document).ready(function documentReady() {
 
     webSocketConnection.onerror = function webSocketError(event) {
       console.log('WebSocket error.');
+    };
+
+    webSocketConnection.onclose = function webSocketClose(event) {
+      console.log('WebSocket closed. Retrying connection...');
+      new WebSocket('ws://heimdall.multimediatechnology.at:6666');
     };
 
     // Fade in the content on page load.

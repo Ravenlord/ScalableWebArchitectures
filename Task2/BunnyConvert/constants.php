@@ -32,15 +32,17 @@ define('FILE_TARGET', 'file_target');
 define('SUB_FOLDER', 'sub_folder');
 define('SOURCE_FORMAT', 'source_format');
 define('SOURCE_PATH', 'source_path');
+define('TARGET_FORMAT', 'target_format');
 define('TAGS', 'tags');
-define('TAGS_ARTIST', 'artist');
-define('TAGS_TITLE', 'title');
-define('TAGS_ALBUM', 'album');
-define('TAGS_TRACKNO', 'trackno');
-define('TAGS_YEAR', 'year');
+define('TAGS_ARTIST', 'ARTIST');
+define('TAGS_TITLE', 'TITLE');
+define('TAGS_ALBUM', 'ALBUM');
+define('TAGS_TRACKNO', 'TRACKNUMBER');
+define('TAGS_YEAR', 'DATE');
 //----------------------------------------------------------------------------------------------------------------------WebSocket constants.
 // Messaging constants for the WebSocket
 define('WEBSOCKET_COMMAND', 'command');
+define('WEBSOCKET_COMMAND_KEEPALIVE', 'keepalive');
 define('WEBSOCKET_COMMAND_CONVERT_WAV', 'convert_wav');
 define('WEBSOCKET_COMMAND_REGISTER_CLIENT', 'register_client');
 define('WEBSOCKET_COMMAND_REGISTER_FILE_SERVICE', 'register_file_service');
@@ -50,6 +52,7 @@ define('WEBSOCKET_CLIENTID', 'clientId');
 //----------------------------------------------------------------------------------------------------------------------Converter constants.
 define('CODEC_EXE_FLAC', 'flac');
 define('FLAC_OPTIONS_DECODE', ' -d -f -s ');
+define('FLAC_OPTIONS_ENCODE', ' -f -s ');
 define('CODEX_EXE_WAVPACK_DECODE', 'wvunpack');
 define('CODEX_EXE_WAVPACK_ENCODE', 'wavpack');
 define('WAVPACK_OPTIONS_DECODE', ' -q -y ');

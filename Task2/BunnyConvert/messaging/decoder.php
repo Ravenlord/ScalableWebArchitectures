@@ -33,7 +33,29 @@ class Decoder extends Consumer {
     // Check if the converted file is available.
     $fileName = $data[FILE_NAME] . '.' . FILE_FORMAT_WAV;
     if(file_exists($data[SOURCE_PATH] . $fileName)) {
-      // TODO: Pass message to other converters
+      // Pass message for every target format encoder queue.
+      $msgOptions = array('content_type' => 'text/plain', 'delivery_mode' => 2);
+      // FLAC.
+      $msgBody = array(
+                        CLIENT_ID     =>  $data[CLIENT_ID],
+                        SOURCE_PATH   =>  $data[SOURCE_PATH],
+                        FILE_NAME     =>  $fileName,
+                        TAGS          =>  $data[TAGS]
+                      );
+      $encoderFormats = array(FILE_FORMAT_FLAC, FILE_FORMAT_WAVPACK, FILE_FORMAT_MP3);
+      foreach ($encoderFormats as $format) {
+        $msgBody[TARGET_FORMAT] = $format;
+        $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
+        $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
+      }
+//      $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
+//      $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
+//      // WAVPACK.
+//      $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
+//      $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
+//      // MP3.
+//      $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
+//      $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
       $success = true;
     }
     // Pass message to fileService according to success
@@ -44,11 +66,11 @@ class Decoder extends Consumer {
                                   FILE_NAME           =>  $fileName,
                                   SUB_FOLDER          =>  $data[SUB_FOLDER]
                                  ), JSON_UNESCAPED_SLASHES);
-    $msg = new AMQPMessage($msgBody, array('content_type' => 'text/plain', 'delivery_mode' => 2));
+    $msg = new AMQPMessage($msgBody, $msgOptions);
     $this->channel->basic_publish($msg, FILE_SERVICE_EXCHANGE);
   }
 }
 
 // Start the decoder with a unique consumer tag.
-$wavConverter = new Decoder(HOST, PORT, USER, PASS, VHOST, DECODER_QUEUE, DECODER_CONSUMER_TAG . '_' . getmypid());
-$wavConverter->start();
+$decoder = new Decoder(HOST, PORT, USER, PASS, VHOST, DECODER_QUEUE, DECODER_CONSUMER_TAG . '_' . getmypid());
+$decoder->start();
