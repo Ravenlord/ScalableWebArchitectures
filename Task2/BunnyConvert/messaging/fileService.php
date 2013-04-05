@@ -1,21 +1,13 @@
 <?php
 require(__DIR__ . '/consumer.php');
 
-use PhpAmqpLib\Connection\AMQPConnection;
 use Wrench\Client;
 
-// Connect to RabbitMQ.
-$connection = new AMQPConnection(HOST, PORT, USER, PASS, VHOST);
-$channel = $connection->channel();
-// Register shutdown function to shut down messaging properly.
-register_shutdown_function('shutdownMessaging', $channel, $connection);
-
-//TODO: implement RabbitMQ consumer for converter messages and send them to the fileStatusWebSocketServer
 class FileService extends Consumer {
   protected $wrenchClient;
 
-  public function __construct(PhpAmqpLib\Channel\AMQPChannel $channel, $queue, $consumerTag) {
-    parent::__construct($channel, $queue, $consumerTag);
+  public function __construct($host, $port, $user, $pass, $vhost, $queue, $consumerTag) {
+    parent::__construct($host, $port, $user, $pass, $vhost, $queue, $consumerTag);
     // Connect to the WebSocket server.
     $this->wrenchClient = new Client('ws://heimdall.multimediatechnology.at:6666/', 'ws://heimdall.multimediatechnology.at:6666/');
     $this->wrenchClient->connect();
@@ -47,7 +39,9 @@ class FileService extends Consumer {
                                                         WEBSOCKET_COMMAND =>  WEBSOCKET_COMMAND_CONVERT_WAV,
                                                         WEBSOCKET_SUCCESS =>  $success,
                                                         WEBSOCKET_MESSAGE =>  $message,
-                                                        FILE_TARGET        =>  FILE_PATH_WEB . $data[CLIENT_ID] . DIRECTORY_SEPARATOR . $data[SUB_FOLDER] . $data[FILE_NAME]
+                                                        FILE_TARGET       =>  FILE_PATH_WEB . $data[CLIENT_ID] . DIRECTORY_SEPARATOR . $data[SUB_FOLDER] . $data[FILE_NAME],
+                                                        FILE_NAME         =>  $data[FILE_NAME],
+                                                        SUB_FOLDER        =>  trim($data[SUB_FOLDER], '/')
                                                         ), JSON_UNESCAPED_SLASHES));
         break;
       default:
@@ -58,10 +52,5 @@ class FileService extends Consumer {
 }
 
 // Start the WAV converter with a unique consumer tag.
-$fileService = new FileService($channel, FILE_SERVICE_QUEUE, FILE_SERVICE_CONSUMER_TAG . '_' . getmypid());
+$fileService = new FileService(HOST, PORT, USER, PASS, VHOST, FILE_SERVICE_QUEUE, FILE_SERVICE_CONSUMER_TAG . '_' . getmypid());
 $fileService->start();
-// Loop and wait for messages.
-while(count($channel->callbacks)) {
-  $channel->wait();
-}
-?>

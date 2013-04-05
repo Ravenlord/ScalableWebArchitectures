@@ -68,7 +68,7 @@ if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) 
           $channel = $connection->channel();
           // Register the generic shutdown function to ensure the connection and the channel get closed on exit.
           register_shutdown_function('shutdownMessaging', $channel, $connection);
-          $channel->basic_publish($msg, WAV_EXCHANGE);
+          $channel->basic_publish($msg, DECODER_EXCHANGE);
         } else {
           $response[WEBSOCKET_SUCCESS] = false;
           $response[WEBSOCKET_MESSAGE] = 'Your file could not be moved. Please try again.';

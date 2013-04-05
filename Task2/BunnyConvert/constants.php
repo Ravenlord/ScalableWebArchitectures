@@ -18,9 +18,12 @@ define('FILE_FORMAT_WAVPACK', 'wv');
 define('FILE_SERVICE_EXCHANGE', 'file_service_exchange');
 define('FILE_SERVICE_QUEUE', 'file_service_queue');
 define('FILE_SERVICE_CONSUMER_TAG', 'file_service_consumer');
-define('WAV_EXCHANGE', 'wav_exchange');
-define('WAV_QUEUE', 'wav_queue');
-define('WAV_CONVERTER_CONSUMER_TAG', 'wav_consumer');
+define('DECODER_EXCHANGE', 'decoder_exchange');
+define('DECODER_QUEUE', 'decoder_queue');
+define('DECODER_CONSUMER_TAG', 'decoder_consumer');
+define('ENCODER_EXCHANGE', 'encoder_exchange');
+define('ENCODER_QUEUE', 'encoder_queue');
+define('ENCODER_CONSUMER_TAG', 'encoder_consumer');
 // Messaging constants for the fields in the message.
 define('CLIENT_ID', 'client_id');
 define('FILE_SERVICE_ID', 'file_service_id');

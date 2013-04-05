@@ -2,7 +2,7 @@
 require('../constants.php');
 require('../config.php');
 
-use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Connection\AMQPConnection;
 
 /**
  * Basic consumer superclass.
@@ -10,20 +10,28 @@ use PhpAmqpLib\Channel\AMQPChannel;
  * @author Markus Deutschl <deutschl.markus@gmail.com>
  */
 abstract class Consumer {
+  protected $connection;
   protected $channel;
   protected $queue;
   protected $consumerTag;
 
   /**
    * Constructor for the consumer.
-   * @param \PhpAmqpLib\Channel\AMQPChannel $channel The channel associated with the AMQP connection.
-   * @param type $queue The queue to consume from.
-   * @param type $consumerTag The consumer tag to identify the consumer process.
+   * @param string $host        The RabbitMQ host.
+   * @param string $port        The RabbitMQ port.
+   * @param string $user        The RabbitMQ user.
+   * @param string $pass        The RabbitMQ password.
+   * @param string $vhost       The RabbitMQ virtual host.
+   * @param string $consumerTag The consumer tag to identify the consumer process.
    */
-  public function __construct(\PhpAmqpLib\Channel\AMQPChannel $channel, $queue, $consumerTag) {
-    $this->channel = $channel;
+  public function __construct($host, $port, $user, $pass, $vhost, $queue, $consumerTag) {
+    // Establish the connection to RabbitMQ.
+    $this->connection = new AMQPConnection($host, $port, $user, $pass, $vhost);
+    $this->channel = $this->connection->channel();
     $this->queue = $queue;
     $this->consumerTag = $consumerTag;
+    // Register the shutdown() function to ensure the channel and the connection get closed.
+    register_shutdown_function(array($this, 'shutdown'));
   }
 
   /**
@@ -34,8 +42,7 @@ abstract class Consumer {
   public abstract function processMessage($msg);
 
   /**
-   * Starts the consumation of messages from the queue.
-   * @return \Consumer
+   * Starts the consumation of messages from the queue and the waiting loop on the channel.
    */
   public function start() {
     /*
@@ -48,8 +55,17 @@ abstract class Consumer {
      * callback:      Our consumer function to process the messages. Subclasses have to implement it.
      */
     $this->channel->basic_consume($this->queue, $this->consumerTag, false, false, false, false, array($this, 'processMessage'));
-    return $this;
+    // Loop and wait for messages.
+    while(count($this->channel->callbacks)) {
+      $this->channel->wait();
+    }
+  }
+
+  /**
+   * Closes connection and channel.
+   */
+  public function shutdown() {
+    $this->channel->close();
+    $this->connection->close();
   }
 }
-
-?>

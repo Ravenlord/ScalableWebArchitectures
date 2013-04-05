@@ -54,6 +54,8 @@ class FileStatusNotifier implements MessageComponentInterface {
 
   public function onError(ConnectionInterface $conn, \Exception $e) {
     echo 'Error: ' + $e->getMessage() . "\n";
+    $this->clients->detach($conn);
+    $this->fileServices->detach($conn);
     $conn->close();
   }
 

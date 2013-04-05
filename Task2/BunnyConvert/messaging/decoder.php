@@ -1,33 +1,15 @@
 <?php
 require(__DIR__.'/consumer.php');
 
-use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-// Connect to RabbitMQ.
-$connection = new AMQPConnection(HOST, PORT, USER, PASS, VHOST);
-$channel = $connection->channel();
-// Register shutdown function to shut down messaging properly.
-register_shutdown_function('shutdownMessaging', $channel, $connection);
-
-/*
- * Consume messages from our queue.
- * queue:         The queue to consume from.
- * consumer_tag:  The ID for our WAV converter.
- * no_local:      Don't receive messages published by this consumer (false).
- * no_ack:        Messages will be acknowlegded.
- * exclusive:     Every consumer can access this queue. Crucial for scaling.
- * nowait:
- * callback:      Our consumer function to process the messages.
-*/
-//$channel->basic_consume(WAV_QUEUE, WAV_CONVERTER_CONSUMER_TAG, false, false, false, false, 'processMessage');
 /**
- * The WavConverter class. Converts the incoming files to WAV files and messages fileService + other converters.
+ * The Decoder class. Converts the incoming files to WAV files and messages fileService + other converters.
  * @author Markus Deutschl <deutschl.markus@gmail.com>
  */
-class WavConverter extends Consumer {
-  public function __construct(PhpAmqpLib\Channel\AMQPChannel $channel, $queue, $consumerTag) {
-    parent::__construct($channel, $queue, $consumerTag);
+class Decoder extends Consumer {
+  public function __construct($host, $port, $user, $pass, $vhost, $queue, $consumerTag) {
+    parent::__construct($host, $port, $user, $pass, $vhost, $queue, $consumerTag);
   }
 
   public function processMessage($msg) {
@@ -67,11 +49,6 @@ class WavConverter extends Consumer {
   }
 }
 
-// Start the WAV converter with a unique consumer tag.
-$wavConverter = new WavConverter($channel, WAV_QUEUE, WAV_CONVERTER_CONSUMER_TAG . '_' . getmypid());
+// Start the decoder with a unique consumer tag.
+$wavConverter = new Decoder(HOST, PORT, USER, PASS, VHOST, DECODER_QUEUE, DECODER_CONSUMER_TAG . '_' . getmypid());
 $wavConverter->start();
-// Loop and wait for messages.
-while(count($channel->callbacks)) {
-  $channel->wait();
-}
-?>

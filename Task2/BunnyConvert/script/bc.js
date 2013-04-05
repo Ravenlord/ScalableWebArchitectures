@@ -1,9 +1,21 @@
 var bcUID = undefined;
+var filesPresent = false;
+
+var COMMAND_REGISTER_CLIENT = 'register_client';
+var COMMAND_CONVERT_WAV = 'convert_wav';
+
+function generateFileTableRow(fileName, target, subFolder) {
+  return '<tr class="display-none"><td><a href="' + target + '" target="_blank">' + fileName + '</a></td><td>' + subFolder + '</td></tr>';
+}
 
 $(document).ready(function documentReady() {
   // Check the requirements for this application to work.
   var requirements = true;
   var applicationErrorMessage = '';
+  var $fileTableBody = $('#file-table tbody');
+  if(document.getElementById('no-files') == null) {
+    filesPresent = true;
+  }
   bcUID = $.cookie('BCUID');
 
   if(!bcUID) {
@@ -34,13 +46,25 @@ $(document).ready(function documentReady() {
         var data = $.parseJSON(event.data);
         if(data && data.command) {
           switch(data.command){
-            case 'register_client':
+            case COMMAND_REGISTER_CLIENT:
               if(data.success) {
                 console.log('Client registered.');
               }
               break;
-              default:
-                console.log('Unrecognized command.');
+            case COMMAND_CONVERT_WAV:
+              if(data.success) {
+                // Append the newly available file to the table.
+                if(!filesPresent) {
+                  $('#no-files').fadeOut('slow').remove();
+                }
+                $(generateFileTableRow(data.file_name, data.file_target, data.sub_folder)).appendTo($fileTableBody).fadeIn('slow');
+                console.log('WAV conversion succeeded. File: ' + data.file_name + ' Folder: ' + data.sub_folder);
+              } else {
+                console.log('WAV convsersion failed. Message: ' + data.message)
+              }
+              break;
+            default:
+              console.log('Unrecognized command.');
           }
         } else {
           console.log('Illegal message format.');
@@ -64,7 +88,7 @@ $(document).ready(function documentReady() {
     });
 
     // Apply the jQuery table sorter to the table
-    $('#file-table').tablesorter();
+      $('#file-table').tablesorter({ sortList: [[0,0], [1,0]] });
 
     // Apply the jQuery form plugin to the form.
     var formOptions = {

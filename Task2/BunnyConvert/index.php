@@ -32,25 +32,26 @@ if (file_exists($path)) {
 echo '<!DOCTYPE html><html><head><meta charset=utf-8 /><title>BunnyConvert</title><link rel="stylesheet" type="text/css" href="assets/css/bootstrap.css" /><link rel="stylesheet" type="text/css" href="style/main.css" /></head><body>';
 echo '<div id="container" class="container"><h1>Welcome to BunnyConvert!</h1>';
 echo '<noscript class="badge badge-important"><i class="icon-white icon-remove"></i>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript>';
-echo '<div id="application-message" class="badge badge-important"></div>';
+echo '<div id="application-message" class="badge badge-important"><noscript><i class="icon-white icon-remove"></i>Warning! This application needs JavaScript enabled in order to work. Please enable it in your Browser.</noscript></div>';
 echo '<div id="content">';
 echo '<div id="files">';
 echo '<strong>' . $uid . '</strong>';
+echo '<table id="file-table" class="tablesorter table table-striped table-hover"><thead><tr><th class="lockedOrder-asc">File</th><th class="lockedOrder-asc">Folder</th></tr></thead><tbody>';
 if (empty($folders)) {
-  echo 'No files processed yet.';
+  echo '<tr id="no-files"><td>No files processed yet.</td><td></td></tr>';
 } else {
-  echo '<table id="file-table"><tr><th>File</th><th>Folder</th></tr>';
   foreach ($folders as $subFolder) {
     $files = scandir($path . '/' . $subFolder);
     $files = cleanFileArray($files);
     if (!empty($files)) {
       foreach ($files as $file) {
-        echo '<tr><td>' . $file . '</td><td>' . $subFolder . '</td></tr>';
+        $filePath = FILE_PATH_WEB . $uid . DIRECTORY_SEPARATOR . $subFolder . DIRECTORY_SEPARATOR . $file;
+        echo '<tr><td><a href="' . $filePath . '" target="_blank">' . $file . '</a></td><td>' . $subFolder . '</td></tr>';
       }
     }
   }
-  echo '</table>';
 }
+echo '</tbody></table>';
 echo '</div>';
 echo '<div id="file-form-wrapper">';
 // Print the upload form
@@ -110,4 +111,3 @@ echo '</div>';
 echo '<div id="debug"></div>';
 echo '</div><!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->';
 echo '<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script><script src="script/jquery.cookie.js"></script><script src="script/jquery.form.js"></script><script src="script/jquery.tablesorter.min.js"></script><script src="script/bc.js"></script></body></html>';
-?>
