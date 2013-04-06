@@ -93,7 +93,8 @@ $(document).ready(function documentReady() {
               if(data.folders) {
                 console.log('Folders deleted: ' + data.folders);
                 data.folders.forEach(function(element){
-                  var trClass = '.' + element
+                  var trClass = '.' + element;
+                  $(trClass + ' a').attr('href', '#');
                   $(trClass).addClass('struck-out').delay(5000).fadeOut('slow', function(){$(trClass).remove();});
                 });
               }
