@@ -3,16 +3,19 @@ var filesPresent = false;
 
 var COMMAND_KEEPALIVE = 'keepalive';
 var COMMAND_REGISTER_CLIENT = 'register_client';
-var COMMAND_CONVERT_WAV = 'convert_wav';
+var COMMAND_DECODE = 'decode';
+var COMMAND_ENCODE = 'encode';
+var COMMAND_DELETE = 'delete';
 
 function generateFileTableRow(fileName, target, subFolder) {
-  return '<tr class="display-none"><td><a href="' + target + '" target="_blank">' + fileName + '</a></td><td>' + subFolder + '</td></tr>';
+  return '<tr class="display-none ' + subFolder + '"><td><a href="' + target + '" target="_blank">' + fileName + '</a></td><td>' + subFolder + '</td></tr>';
 }
 
 $(document).ready(function documentReady() {
   // Check the requirements for this application to work.
   var requirements = true;
   var applicationErrorMessage = '';
+  var $fileTable = $('#file-table');
   var $fileTableBody = $('#file-table tbody');
   if(document.getElementById('no-files') == null) {
     filesPresent = true;
@@ -43,7 +46,7 @@ $(document).ready(function documentReady() {
 
     webSocketConnection.onmessage = function webSocketMessage(event) {
       if(event.data) {
-        console.log('Received message: ' + event.data);
+//        console.log('Received message: ' + event.data);
         var data = $.parseJSON(event.data);
         if(data && data.command) {
           switch(data.command){
@@ -61,16 +64,38 @@ $(document).ready(function documentReady() {
             case COMMAND_KEEPALIVE:
               console.log('Keepalive succeeded.');
               break;
-            case COMMAND_CONVERT_WAV:
+            case COMMAND_DECODE:
               if(data.success) {
                 // Append the newly available file to the table.
                 if(!filesPresent) {
                   $('#no-files').fadeOut('slow').remove();
                 }
                 $(generateFileTableRow(data.file_name, data.file_target, data.sub_folder)).appendTo($fileTableBody).fadeIn('slow');
+                // Update sort order
+                $fileTable.trigger('update');
                 console.log('WAV conversion succeeded. File: ' + data.file_name + ' Folder: ' + data.sub_folder);
               } else {
-                console.log('WAV convsersion failed. Message: ' + data.message)
+                console.log('WAV convsersion failed. Message: ' + data.message);
+              }
+              break;
+            case COMMAND_ENCODE:
+              if(data.success) {
+                // Append the newly available file to the table.
+                $(generateFileTableRow(data.file_name, data.file_target, data.sub_folder)).appendTo($fileTableBody).fadeIn('slow');
+                // Update sort order
+                $fileTable.trigger('update');
+                console.log(data.target_format + ' conversion succeeded. File: ' + data.file_name + ' Folder: ' + data.sub_folder);
+              } else {
+                console.log(data.target_format + ' convsersion failed. Message: ' + data.message);
+              }
+              break;
+            case COMMAND_DELETE:
+              if(data.folders) {
+                console.log('Folders deleted: ' + data.folders);
+                data.folders.forEach(function(element){
+                  var trClass = '.' + element
+                  $(trClass).addClass('struck-out').delay(5000).fadeOut('slow', function(){$(trClass).remove();});
+                });
               }
               break;
             default:
@@ -103,7 +128,7 @@ $(document).ready(function documentReady() {
     });
 
     // Apply the jQuery table sorter to the table
-      $('#file-table').tablesorter({ sortList: [[0,0], [1,0]] });
+      $('#file-table').tablesorter({ sortList: [[1,0], [0,0]] });
 
     // Apply the jQuery form plugin to the form.
     var formOptions = {

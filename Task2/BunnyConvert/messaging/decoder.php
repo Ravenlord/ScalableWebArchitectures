@@ -19,15 +19,9 @@ class Decoder extends Consumer {
     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
     $data = json_decode($msg->body, true);
     // TODO: sanitizing checks
-    switch ($data[SOURCE_FORMAT]) {
-      case FILE_FORMAT_FLAC:
-        $command = CODEC_EXE_FLAC . FLAC_OPTIONS_DECODE . $data[SOURCE_PATH] . $data[FILE_NAME] . '.' . FILE_FORMAT_FLAC;
-        shell_exec($command);
-        break;
-      case FILE_FORMAT_WAVPACK:
-        $command = CODEX_EXE_WAVPACK_DECODE . WAVPACK_OPTIONS_DECODE . $data[SOURCE_PATH] . $data[FILE_NAME] . '.' . FILE_FORMAT_WAVPACK;
-        shell_exec($command);
-        break;
+    // Call decoder method according to source format.
+    if($data[SOURCE_FORMAT] != FILE_FORMAT_WAV) {
+      call_user_func(array($this, $data[SOURCE_FORMAT] . 'Decode'), $data[SOURCE_PATH], $data[FILE_NAME]);
     }
     $success = false;
     // Check if the converted file is available.
@@ -39,8 +33,9 @@ class Decoder extends Consumer {
       $msgBody = array(
                         CLIENT_ID     =>  $data[CLIENT_ID],
                         SOURCE_PATH   =>  $data[SOURCE_PATH],
-                        FILE_NAME     =>  $fileName,
-                        TAGS          =>  $data[TAGS]
+                        FILE_NAME     =>  $data[FILE_NAME],
+                        TAGS          =>  $data[TAGS],
+                        SUB_FOLDER    =>  $data[SUB_FOLDER]
                       );
       $encoderFormats = array(FILE_FORMAT_FLAC, FILE_FORMAT_WAVPACK, FILE_FORMAT_MP3);
       foreach ($encoderFormats as $format) {
@@ -48,26 +43,38 @@ class Decoder extends Consumer {
         $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
         $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
       }
-//      $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
-//      $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
-//      // WAVPACK.
-//      $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
-//      $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
-//      // MP3.
-//      $msg = new AMQPMessage(json_encode($msgBody, JSON_UNESCAPED_SLASHES), $msgOptions);
-//      $this->channel->basic_publish($msg, ENCODER_EXCHANGE);
       $success = true;
     }
-    // Pass message to fileService according to success
+    // Pass message to fileService according to success.
     $msgBody = json_encode(array(
                                   CLIENT_ID           =>  $data[CLIENT_ID],
-                                  WEBSOCKET_COMMAND   =>  WEBSOCKET_COMMAND_CONVERT_WAV,
+                                  WEBSOCKET_COMMAND   =>  WEBSOCKET_COMMAND_DECODE,
                                   WEBSOCKET_SUCCESS   =>  $success,
                                   FILE_NAME           =>  $fileName,
                                   SUB_FOLDER          =>  $data[SUB_FOLDER]
                                  ), JSON_UNESCAPED_SLASHES);
     $msg = new AMQPMessage($msgBody, $msgOptions);
     $this->channel->basic_publish($msg, FILE_SERVICE_EXCHANGE);
+  }
+
+  /**
+   * Converts the source FLAC file to WAV.
+   * @param string $sourcePath  The file path where the file to convert resides.
+   * @param string $fileName    The source file name.
+   */
+  public function flacDecode($sourcePath, $fileName) {
+    $command = CODEC_EXE_FLAC . FLAC_OPTIONS_DECODE . $sourcePath . $fileName . '.' . FILE_FORMAT_FLAC;
+    shell_exec($command);
+  }
+
+  /**
+   * Converts the source WAVPACK file to WAV.
+   * @param string $sourcePath  The file path where the file to convert resides.
+   * @param string $fileName    The source file name.
+   */
+  public function wvDecode($sourcePath, $fileName) {
+    $command = CODEC_EXE_WAVPACK_DECODE . WAVPACK_OPTIONS_DECODE . $sourcePath . $fileName . '.' . FILE_FORMAT_WAVPACK;
+    shell_exec($command);
   }
 }
 

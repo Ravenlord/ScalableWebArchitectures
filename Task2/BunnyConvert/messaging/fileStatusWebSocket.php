@@ -12,7 +12,7 @@ class FileStatusNotifier implements MessageComponentInterface {
   private $fileServices;
   //TODO: Integrate RabbitMQ messages here
   public function __construct() {
-    $this->clients = new \SplObjectStorage();
+    $this->clients = array();
     $this->fileServices = new \SplObjectStorage();
   }
 
@@ -35,7 +35,7 @@ class FileStatusNotifier implements MessageComponentInterface {
           $success = false;
         } else {
           echo "Registering client " . $from->resourceId . " with BCID " . $msg[WEBSOCKET_CLIENTID] . "\n";
-          $this->clients->attach($from, $msg[WEBSOCKET_CLIENTID]);
+          $this->clients[$msg[WEBSOCKET_CLIENTID]] = $from;
         }
         $returnMessage = array(WEBSOCKET_COMMAND => WEBSOCKET_COMMAND_REGISTER_CLIENT, WEBSOCKET_SUCCESS => $success);
         $from->send(json_encode($returnMessage));
@@ -48,8 +48,14 @@ class FileStatusNotifier implements MessageComponentInterface {
         $this->fileServices->attach($from, $msg[FILE_SERVICE_ID]);
         echo "Registering file service " . $from->resourceId . " with ID " . $msg[FILE_SERVICE_ID] . "\n";
         break;
-      case WEBSOCKET_COMMAND_CONVERT_WAV:
-        $this->notifyClient($msg[CLIENT_ID], $msg);
+      case WEBSOCKET_COMMAND_DECODE:
+        $this->notifyClient($msg[CLIENT_ID], json_encode($msg, JSON_UNESCAPED_SLASHES));
+        break;
+      case WEBSOCKET_COMMAND_ENCODE:
+        $this->notifyClient($msg[CLIENT_ID], json_encode($msg, JSON_UNESCAPED_SLASHES));
+        break;
+      case WEBSOCKET_COMMAND_DELETE:
+        $this->notifyClient($msg[CLIENT_ID], json_encode($msg));
         break;
       default:
         echo "Unrecognized command.\n";
@@ -58,23 +64,29 @@ class FileStatusNotifier implements MessageComponentInterface {
 
   public function onError(ConnectionInterface $conn, \Exception $e) {
     echo 'Error: ' + $e->getMessage() . "\n";
-    $this->clients->detach($conn);
+    $this->detachClient($conn);
     $this->fileServices->detach($conn);
     $conn->close();
   }
 
   public function onClose(ConnectionInterface $conn) {
     echo 'Client ' . $conn->resourceId . " disconnected.\n";
-    $this->clients->detach($conn);
+    $this->detachClient($conn);
     $this->fileServices->detach($conn);
   }
 
-  private function notifyClient($clientId, $message) {
-    foreach ($this->clients as $client) {
-      if($this->clients[$client] == $clientId) {
-        $client->send(json_encode($message), JSON_UNESCAPED_SLASHES);
+  private function detachClient($conn) {
+    foreach ($this->clients as $uid => $clientConnection) {
+      if($conn == $clientConnection) {
+        unset($this->clients[$uid]);
         return;
       }
+    }
+  }
+
+  private function notifyClient($clientId, $message) {
+    if(array_key_exists($clientId, $this->clients)) {
+      $this->clients[$clientId]->send($message);
     }
   }
 

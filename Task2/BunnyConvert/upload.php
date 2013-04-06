@@ -6,8 +6,7 @@ require(__DIR__ . '/config.php');
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-
-$allowedExtensions = array('wav', 'wv', 'flac');
+$allowedExtensions = array(FILE_FORMAT_WAV, FILE_FORMAT_WAVPACK, FILE_FORMAT_FLAC);
 $response[WEBSOCKET_SUCCESS] = true;
 $response[WEBSOCKET_MESSAGE] = 'Your file has been successfully uploaded!';
 if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) {
@@ -42,18 +41,19 @@ if (!empty($_COOKIE[COOKIE_UID]) && strlen($_COOKIE[COOKIE_UID]) == MD5_LENGTH) 
         chmod($fileUploadName, 0777);
         // If the new folder exists now, continue.
         if($returnCode){
-          //TODO: pass message to WAV converter.
           $artist = !empty($_POST[TAGS_ARTIST]) ? $_POST[TAGS_ARTIST] : '';
           $title = !empty($_POST[TAGS_TITLE]) ? $_POST[TAGS_TITLE] : '';
           $album = !empty($_POST[TAGS_ALBUM]) ? $_POST[TAGS_ALBUM] : '';
           $trackno = !empty($_POST[TAGS_TRACKNO]) ? $_POST[TAGS_TRACKNO] : '';
           $year = !empty($_POST[TAGS_YEAR]) ? $_POST[TAGS_YEAR] : '';
+          $genre = !empty($_POST[TAGS_GENRE]) ? $_POST[TAGS_GENRE] : '';
           $tags = array(
-                          TAGS_ARTIST => $artist,
-                          TAGS_TITLE => $title,
-                          TAGS_ALBUM => $album,
-                          TAGS_TRACKNO => $trackno,
-                          TAGS_YEAR => $year
+                          TAGS_ARTIST   =>  $artist,
+                          TAGS_TITLE    =>  $title,
+                          TAGS_ALBUM    =>  $album,
+                          TAGS_TRACKNO  =>  $trackno,
+                          TAGS_YEAR     =>  $year,
+                          TAGS_GENRE    =>  $genre
                         );
           $msgBody = json_encode(array(
                                         CLIENT_ID     =>  $clientId,
